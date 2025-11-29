@@ -1,0 +1,189 @@
+:root {
+  --sort-width: 17vw;
+  --main-width: 71vw;
+  --nav-color: #e2e2e2;
+}
+
+@font-face {
+  font-family: "yekan";
+  src: url("./Yekan.ttf");
+}
+
+body {
+  direction: rtl;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.hero-nav {
+  background-color: var(--nav-color);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  color: #3a3a3a;
+  padding-right: 5vw;
+}
+
+a {
+  color: #3a3a3a;
+}
+
+.active {
+  color: #000000;
+}
+
+.horizontal {
+  display: flex;
+
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5vw;
+}
+
+.horizontal p {
+  font-family: "yekan";
+  font-size: 1.1rem;
+}
+
+.mini-gap {
+  gap: 3vw;
+}
+
+.horizontal-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: row;
+  gap: 1vw;
+  margin: 1vw 0;
+}
+
+.vertical-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+}
+
+.top-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(150, 150, 150, 0.5);
+  border-radius: 10px;
+  padding: 0 2vw;
+  width: var(--main-width);
+}
+
+.text {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.sort-top-bar {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+}
+
+.sort-top-bar > a {
+  color: #4a4a4a;
+}
+
+input[type="checkbox"] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+label {
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 45px;
+  height: 25px;
+  background: grey;
+  display: block;
+  border-radius: 100px;
+  position: relative;
+}
+
+label:after {
+  content: "";
+  position: absolute;
+  top: 2.5px;
+  left: 3px;
+  width: 19px;
+  height: 20px;
+  background: #fff;
+  border-radius: 90px;
+  transition: 0.2s;
+}
+
+input:checked + label {
+  background: #bada55;
+}
+
+input:checked + label:after {
+  left: calc(100% - 3px);
+  transform: translateX(-100%);
+}
+
+label:active:after {
+  width: 22px;
+}
+
+.product-list-full-page {
+  display: grid;
+  grid-template-columns: repeat(4, calc((var(--main-width) - 3vw) / 4));
+  column-gap: 1vw;
+  row-gap: 1vw;
+}
+
+.sort {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(150, 150, 150, 0.5);
+  border-radius: 10px;
+  width: var(--sort-width);
+}
+
+.search-box {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid rgba(150, 150, 150, 0.5);
+  width: calc(var(--sort-width) - 2.2vw);
+  margin: 1vw 1vw;
+  padding-left: 2vw;
+  padding: 5px 0 5px 5px;
+  border-radius: 10px;
+}
+
+.search-box input {
+  background-color: transparent;
+  font-family: "nazanin";
+  font-size: 1.1rem;
+  border: 0;
+  padding-right: 2vw;
+  width: calc(var(--sort-width) - 2.2vw - 4vw);
+  border-radius: 10px;
+  height: 40px;
+}
+
+.search-box input:focus {
+  border: none;
+  outline: none;
+}
+
+.filter-container {
+  margin: 0 1.2vw;
+}

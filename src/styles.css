@@ -12,9 +12,24 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@font-face {
+  font-family: "nazanin";
+  src: url(./B-NAZANIN.TTF);
+}
+
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+  font-family: "nazanin";
+}
+
 body {
   direction: rtl;
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 header {
@@ -32,7 +47,7 @@ header {
 }
 
 .main-nav {
-  font-size: 1rem;
+  font-size: 1.3rem;
   display: flex;
   flex-direction: row;
   gap: 2rem;

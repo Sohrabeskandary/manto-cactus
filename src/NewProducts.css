@@ -9,10 +9,11 @@
   display: flex;
   justify-content: center;
   gap: 1.5rem;
-  /* flex-wrap: wrap; */
 }
 
 .product-card {
+  display: flex;
+  flex-direction: column;
   width: 17vw;
   background-color: #fff;
   border-radius: 12px;
@@ -33,7 +34,7 @@
 }
 
 .product-info {
-  padding: 0.8rem 0;
+  padding: 0.3rem 0.8rem;
   border-top: 1px solid #eee;
 }
 
