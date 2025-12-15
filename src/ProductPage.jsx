@@ -45,7 +45,7 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1);
 
   return (
-    <div>
+    <div className="big-container">
       <div className="product-page">
         {/* ---- تصاویر ---- */}
         <div className="product-gallery">

@@ -49,14 +49,22 @@
   src: url(./B-NAZANIN.TTF);
 }
 
+.big-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 /* کانتینر اصلی */
 .product-page {
+  justify-content: center;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
-  width: 80vw;
+  width: 140rem;
   max-width: 1200px;
-  margin: 20px 100px;
+  margin: 20px 10vw;
   direction: rtl;
 }
 
@@ -222,9 +230,11 @@ select {
 }
 
 .new-products-section {
+  width: 100%;
   text-align: center;
   padding: 1rem 0;
   background-color: #f9f9f9;
+  border-bottom: 1px solid #3333332a;
 }
 
 .product-list1 {
