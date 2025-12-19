@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./AdminPage.css";
+import ProductList from "./ProductList";
 
 function ProductStep({ product, setProduct, next }) {
   const categories = [
@@ -8,54 +9,69 @@ function ProductStep({ product, setProduct, next }) {
     { id: 3, name: "پالتو" },
     { id: 4, name: "کاپشن" },
   ];
-  const isValid = product.title && product.category_id && product.base_price;
+
+  const isValid =
+    product.title && product.category_id && product.base_price > 0;
+
+  const [editingId, setEditingId] = useState(null);
 
   return (
-    <div className="form-container">
-      <h2>اطلاعات محصول</h2>
+    <div>
+      <div className="form-container">
+        <h2>اطلاعات محصول</h2>
 
-      <input
-        placeholder="نام محصول"
-        value={product.title}
-        className="form-input"
-        onChange={(e) => setProduct({ ...product, title: e.target.value })}
-      />
+        <input
+          className="form-input"
+          placeholder="نام محصول"
+          value={product.title}
+          onChange={(e) => setProduct({ ...product, title: e.target.value })}
+        />
 
-      <select
-        className="form-input"
-        value={product.category_id}
-        onChange={(e) =>
-          setProduct({ ...product, category_id: e.target.value })
-        }
-      >
-        <option value="">انتخاب دسته‌بندی</option>
-        {categories.map((cat) => (
-          <option key={cat.id} value={cat.id}>
-            {cat.name}
-          </option>
-        ))}
-      </select>
+        <select
+          className="form-input"
+          value={product.category_id}
+          onChange={(e) =>
+            setProduct({
+              ...product,
+              category_id: Number(e.target.value),
+            })
+          }
+        >
+          <option value="">انتخاب دسته‌بندی</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
 
-      <input
-        className="form-input"
-        type="number"
-        placeholder="قیمت پایه"
-        value={product.base_price}
-        onChange={(e) => setProduct({ ...product, base_price: e.target.value })}
-      />
+        <input
+          className="form-input"
+          type="number"
+          placeholder="قیمت پایه"
+          value={product.base_price}
+          onChange={(e) =>
+            setProduct({
+              ...product,
+              base_price: Number(e.target.value),
+            })
+          }
+        />
 
-      <textarea
-        className="form-textbox"
-        placeholder="توضیحات"
-        value={product.description}
-        onChange={(e) =>
-          setProduct({ ...product, description: e.target.value })
-        }
-      />
+        <textarea
+          className="form-textbox"
+          placeholder="توضیحات"
+          value={product.description}
+          onChange={(e) =>
+            setProduct({ ...product, description: e.target.value })
+          }
+        />
 
-      <button disabled={!isValid} onClick={next} className="form-button">
-        مرحله بعد
-      </button>
+        <button disabled={!isValid} onClick={next} className="form-button">
+          مرحله بعد
+        </button>
+      </div>
+      <ProductList />
     </div>
   );
 }
@@ -82,7 +98,7 @@ function VariantRow({ variant, index, update, remove }) {
         type="number"
         placeholder="قیمت"
         value={variant.price}
-        onChange={(e) => update(index, "price", e.target.value)}
+        onChange={(e) => update(index, "price", Number(e.target.value))}
       />
 
       <input
@@ -90,7 +106,7 @@ function VariantRow({ variant, index, update, remove }) {
         type="number"
         placeholder="موجودی"
         value={variant.stock}
-        onChange={(e) => update(index, "stock", e.target.value)}
+        onChange={(e) => update(index, "stock", Number(e.target.value))}
       />
 
       <button className="remove-variant" onClick={() => remove(index)}>
@@ -114,7 +130,7 @@ function VariantStep({ product, variants, setVariants, back, submit }) {
         size: "فری سایز",
         color: "",
         price: product.base_price,
-        stock: 0,
+        stock: "",
       },
     ]);
   };
@@ -164,17 +180,30 @@ export default function AdminPage() {
   });
 
   const [variants, setVariants] = useState([
-    { size: "", color: "", price: "", stock: "" },
+    {
+      size: "فری سایز",
+      color: "",
+      price: "",
+      stock: "",
+    },
   ]);
 
   const submitAll = async () => {
-    await fetch("/api/products-with-variants", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ product, variants }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product, variants }),
+      });
 
-    alert("محصول ثبت شد");
+      const data = await res.json();
+
+      if (data.success) alert("محصول با موفقیت ثبت شد!");
+      else alert("خطا در ثبت محصول");
+    } catch (err) {
+      console.error(err);
+      alert("ارتباط با سرور برقرار نشد");
+    }
   };
 
   return (
