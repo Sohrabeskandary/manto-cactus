@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AdminPage.css";
 import ProductList from "./ProductList";
 
-function ProductStep({ product, setProduct, next }) {
+function ProductStep({ product, setProduct, setVariants, setEditingId, next }) {
   const categories = [
     { id: 1, name: "مانتو" },
     { id: 2, name: "شومیز" },
@@ -13,7 +13,48 @@ function ProductStep({ product, setProduct, next }) {
   const isValid =
     product.title && product.category_id && product.base_price > 0;
 
-  const [editingId, setEditingId] = useState(null);
+  const [products, setProducts] = useState([]);
+
+  const fetchProducts = async () => {
+    const res = await fetch("http://localhost:5000/api/products");
+    const data = await res.json();
+    setProducts(data);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleEdit = (p) => {
+    setProduct({
+      title: p.title,
+      description: p.description,
+      category_id: p.category_id,
+      base_price: Number(p.base_price),
+    });
+
+    setVariants(
+      p.variants.map((v) => ({
+        size: v.size,
+        color: v.color,
+        price: Number(v.price),
+        stock: v.stock,
+      }))
+    );
+
+    setEditingId(p.id);
+    next(); // برو مرحله واریانت
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("حذف شود؟")) return;
+
+    await fetch(`http://localhost:5000/api/products/${id}`, {
+      method: "DELETE",
+    });
+
+    fetchProducts();
+  };
 
   return (
     <div>
@@ -71,7 +112,11 @@ function ProductStep({ product, setProduct, next }) {
           مرحله بعد
         </button>
       </div>
-      <ProductList />
+      <ProductList
+        products={products}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }
@@ -188,21 +233,46 @@ export default function AdminPage() {
     },
   ]);
 
+  const [editingId, setEditingId] = useState(null);
+
   const submitAll = async () => {
+    const url = editingId
+      ? `http://localhost:5000/api/products/${editingId}`
+      : "http://localhost:5000/api/products";
+
+    const method = editingId ? "PUT" : "POST";
+
     try {
-      const res = await fetch("http://localhost:5000/api/products", {
-        method: "POST",
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product, variants }),
       });
 
       const data = await res.json();
 
-      if (data.success) alert("محصول با موفقیت ثبت شد!");
-      else alert("خطا در ثبت محصول");
+      if (!res.ok) {
+        alert(data.error || "خطا در ثبت");
+        return;
+      }
+
+      alert(editingId ? "محصول ویرایش شد ✅" : "محصول ثبت شد ✅");
+
+      // reset
+      setProduct({
+        title: "",
+        description: "",
+        category_id: "",
+        base_price: "",
+      });
+
+      setVariants([{ size: "فری سایز", color: "", price: "", stock: "" }]);
+
+      setEditingId(null);
+      setStep(1);
     } catch (err) {
       console.error(err);
-      alert("ارتباط با سرور برقرار نشد");
+      alert("خطا در ارتباط با سرور");
     }
   };
 
@@ -212,6 +282,8 @@ export default function AdminPage() {
         <ProductStep
           product={product}
           setProduct={setProduct}
+          setVariants={setVariants}
+          setEditingId={setEditingId}
           next={() => setStep(2)}
         />
       )}

@@ -96,11 +96,17 @@ app.delete("/api/products/:id", async (req, res) => {
 });
 
 app.put("/api/products/:id", async (req, res) => {
+  console.log("PUT BODY:", req.body);
+
   const { id } = req.params;
-  const { product } = req.body;
+  const { product, variants } = req.body;
+  const client = await pool.connect();
 
   try {
-    await pool.query(
+    await client.query("BEGIN");
+
+    // update product
+    await client.query(
       `
       UPDATE products
       SET title = $1,
@@ -118,10 +124,28 @@ app.put("/api/products/:id", async (req, res) => {
       ]
     );
 
+    // delete old variants
+    await client.query("DELETE FROM variants WHERE product_id = $1", [id]);
+
+    // insert new variants
+    for (const v of variants) {
+      await client.query(
+        `
+        INSERT INTO variants (product_id, size, color, price, stock)
+        VALUES ($1, $2, $3, $4, $5)
+        `,
+        [id, v.size, v.color, v.price, v.stock]
+      );
+    }
+
+    await client.query("COMMIT");
     res.json({ success: true });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ success: false });
+  } finally {
+    client.release();
   }
 });
 
