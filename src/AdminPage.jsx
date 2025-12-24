@@ -161,7 +161,49 @@ function VariantRow({ variant, index, update, remove }) {
   );
 }
 
-function VariantStep({ product, variants, setVariants, back, submit }) {
+function ImageUploader({ images, setImages }) {
+  const handleSelect = (e) => {
+    const files = Array.from(e.target.files);
+
+    if (images.length + files.length > 10) {
+      alert("حداکثر ۱۰ تصویر مجاز است");
+      return;
+    }
+
+    setImages([...images, ...files]);
+  };
+
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="image-uploader">
+      <h3>گالری تصاویر</h3>
+
+      <input type="file" accept="image/*" multiple onChange={handleSelect} />
+
+      <div className="image-preview">
+        {images.map((img, i) => (
+          <div key={i} className="preview-item">
+            <img src={URL.createObjectURL(img)} alt="" />
+            <button onClick={() => removeImage(i)}>❌</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function VariantStep({
+  product,
+  variants,
+  setVariants,
+  images,
+  setImages,
+  back,
+  submit,
+}) {
   const updateVariant = (index, field, value) => {
     const copy = [...variants];
     copy[index][field] = value;
@@ -201,6 +243,7 @@ function VariantStep({ product, variants, setVariants, back, submit }) {
       <button className="add-variant" onClick={addVariant}>
         ➕ افزودن واریانت
       </button>
+      <ImageUploader images={images} setImages={setImages} />
 
       <div className="register-container">
         <button className="next-previous" onClick={back}>
@@ -235,6 +278,8 @@ export default function AdminPage() {
 
   const [editingId, setEditingId] = useState(null);
 
+  const [images, setImages] = useState([]);
+
   const submitAll = async () => {
     const url = editingId
       ? `http://localhost:5000/api/products/${editingId}`
@@ -242,11 +287,19 @@ export default function AdminPage() {
 
     const method = editingId ? "PUT" : "POST";
 
+    const formData = new FormData();
+
+    formData.append("product", JSON.stringify(product));
+    formData.append("variants", JSON.stringify(variants));
+
+    images.forEach((img) => {
+      formData.append("images", img);
+    });
+
     try {
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product, variants }),
+        body: formData, // ❗ no headers
       });
 
       const data = await res.json();
@@ -267,6 +320,7 @@ export default function AdminPage() {
       });
 
       setVariants([{ size: "فری سایز", color: "", price: "", stock: "" }]);
+      setImages([]);
 
       setEditingId(null);
       setStep(1);
@@ -293,6 +347,8 @@ export default function AdminPage() {
           product={product}
           variants={variants}
           setVariants={setVariants}
+          images={images}
+          setImages={setImages}
           back={() => setStep(1)}
           submit={submitAll}
         />

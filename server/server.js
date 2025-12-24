@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import pkg from "pg";
+import multer from "multer";
+import path from "path";
 
 const { Pool } = pkg;
 
@@ -17,14 +19,37 @@ const pool = new Pool({
   port: 5432,
 });
 
-app.post("/api/products", async (req, res) => {
-  const { product, variants } = req.body;
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const name = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, name + ext);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    files: 10,
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+});
+
+app.use("/uploads", express.static("uploads"));
+
+app.post("/api/products", upload.array("images", 10), async (req, res) => {
   const client = await pool.connect();
 
   try {
+    const product = JSON.parse(req.body.product);
+    const variants = JSON.parse(req.body.variants);
+    const images = req.files;
+
     await client.query("BEGIN");
 
-    // insert product
     const productResult = await client.query(
       `
       INSERT INTO products (title, description, category_id, base_price)
@@ -41,7 +66,7 @@ app.post("/api/products", async (req, res) => {
 
     const productId = productResult.rows[0].id;
 
-    // insert variants
+    // variants
     for (const v of variants) {
       await client.query(
         `
@@ -49,6 +74,17 @@ app.post("/api/products", async (req, res) => {
         VALUES ($1, $2, $3, $4, $5)
         `,
         [productId, v.size, v.color, v.price, v.stock]
+      );
+    }
+
+    // images
+    for (const img of images) {
+      await client.query(
+        `
+        INSERT INTO product_images (product_id, filename)
+        VALUES ($1, $2)
+        `,
+        [productId, img.filename]
       );
     }
 
@@ -70,10 +106,12 @@ app.get("/api/products", async (req, res) => {
     );
 
     const variantsResult = await pool.query("SELECT * FROM variants");
+    const imagesResult = await pool.query("SELECT * FROM product_images");
 
     const products = productsResult.rows.map((product) => ({
       ...product,
       variants: variantsResult.rows.filter((v) => v.product_id === product.id),
+      images: imagesResult.rows.filter((img) => img.product_id === product.id),
     }));
 
     res.json(products);
