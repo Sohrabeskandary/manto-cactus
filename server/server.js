@@ -3,6 +3,11 @@ import cors from "cors";
 import pkg from "pg";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const { Pool } = pkg;
 
@@ -123,13 +128,45 @@ app.get("/api/products", async (req, res) => {
 
 app.delete("/api/products/:id", async (req, res) => {
   const { id } = req.params;
+  const client = await pool.connect();
 
   try {
-    await pool.query("DELETE FROM products WHERE id = $1", [id]);
+    await client.query("BEGIN");
+
+    // 1. get product images
+    const imagesResult = await client.query(
+      "SELECT filename FROM product_images WHERE product_id = $1",
+      [id]
+    );
+
+    // 2. delete image files from uploads
+    for (const img of imagesResult.rows) {
+      const filePath = path.join(__dirname, "uploads", img.filename);
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    // 3. delete image records
+    await client.query("DELETE FROM product_images WHERE product_id = $1", [
+      id,
+    ]);
+
+    // 4. delete variants
+    await client.query("DELETE FROM variants WHERE product_id = $1", [id]);
+
+    // 5. delete product
+    await client.query("DELETE FROM products WHERE id = $1", [id]);
+
+    await client.query("COMMIT");
     res.json({ success: true });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ success: false });
+  } finally {
+    client.release();
   }
 });
 
