@@ -187,6 +187,21 @@ app.put("/api/products/:id", async (req, res) => {
   }
 });
 
+// GET تصاویر یک محصول
+app.get("/api/products/:id/images", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT * FROM product_images WHERE product_id = $1",
+      [id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
 app.listen(5000, () => {
   console.log("🚀 Server running on http://localhost:5000");
 });

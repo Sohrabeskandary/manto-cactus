@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./ProductPage.css";
+import { useParams } from "react-router-dom";
 
 const similarProducts = [
   {
@@ -43,7 +44,14 @@ export default function ProductPage() {
   const [size, setSize] = useState("1");
   const [color, setColor] = useState("olive");
   const [qty, setQty] = useState(1);
-
+  const [images, setImages] = useState([]);
+  const { id } = useParams();
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/products/${id}/images`)
+      .then((res) => res.json())
+      .then((data) => setImages(data))
+      .catch((err) => console.error(err));
+  }, [id]);
   return (
     <div className="big-container">
       <div className="product-page">
@@ -133,6 +141,16 @@ export default function ProductPage() {
         </div>
         {/* محصولات مشابه */}
       </div>
+      <div className="product-gallery">
+        {images.map((img) => (
+          <img
+            key={img.id}
+            src={`http://localhost:5000/uploads/${img.filename}`}
+            alt="product"
+          />
+        ))}
+      </div>
+
       <div className="new-products-section">
         <h2 className="section-title">محصولات مشابه:</h2>
         <div className="product-list">

@@ -49,9 +49,9 @@ export default function FooterSection() {
             width="450"
             height="250"
             className="map"
-            allowfullscreen=""
+            allowFullScreen=""
             loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
+            referrerPolicy="no-referrer-when-downgrade"
           ></iframe>
         </div>
         <div>
