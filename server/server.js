@@ -35,13 +35,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({
-  storage,
-  limits: {
-    files: 10,
-    fileSize: 5 * 1024 * 1024, // 5MB
-  },
-});
+const upload = multer({ dest: "uploads/" });
 
 app.use("/uploads", express.static("uploads"));
 
@@ -170,26 +164,25 @@ app.delete("/api/products/:id", async (req, res) => {
   }
 });
 
-app.put("/api/products/:id", async (req, res) => {
+app.put("/api/products/:id", upload.none(), async (req, res) => {
   console.log("PUT BODY:", req.body);
 
   const { id } = req.params;
-  const { product, variants } = req.body;
+
+  const product = JSON.parse(req.body.product);
+  const variants = JSON.parse(req.body.variants);
+
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    // update product
     await client.query(
       `
-      UPDATE products
-      SET title = $1,
-          description = $2,
-          category_id = $3,
-          base_price = $4
-      WHERE id = $5
-      `,
+        UPDATE products
+        SET title=$1, description=$2, category_id=$3, base_price=$4
+        WHERE id=$5
+        `,
       [
         product.title,
         product.description,
@@ -199,16 +192,14 @@ app.put("/api/products/:id", async (req, res) => {
       ]
     );
 
-    // delete old variants
-    await client.query("DELETE FROM variants WHERE product_id = $1", [id]);
+    await client.query("DELETE FROM variants WHERE product_id=$1", [id]);
 
-    // insert new variants
     for (const v of variants) {
       await client.query(
         `
-        INSERT INTO variants (product_id, size, color, price, stock)
-        VALUES ($1, $2, $3, $4, $5)
-        `,
+          INSERT INTO variants (product_id, size, color, price, stock)
+          VALUES ($1,$2,$3,$4,$5)
+          `,
         [id, v.size, v.color, v.price, v.stock]
       );
     }
@@ -224,7 +215,6 @@ app.put("/api/products/:id", async (req, res) => {
   }
 });
 
-// GET تصاویر یک محصول
 app.get("/api/products/:id/images", async (req, res) => {
   const { id } = req.params;
   try {
