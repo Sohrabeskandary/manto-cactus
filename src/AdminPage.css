@@ -134,3 +134,11 @@
 .variants > VariantRow {
   margin-bottom: 0.25rem;
 }
+
+.variant-color-picker {
+  width: 40px;
+  height: 40px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}

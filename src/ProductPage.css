@@ -1,49 +1,3 @@
-/* .container {
-  display: flex;
-  flex-direction: row;
-  gap: 4vw;
-  align-self: center;
-  margin: 10px 100px;
-}
-
-.image-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.main-image {
-  border: 1px solid #afafaf;
-  border-radius: 12px;
-  overflow: hidden;
-  height: 60vh;
-  width: 29vw;
-}
-
-.sub-image-container {
-  padding-top: 1vh;
-  display: flex;
-  flex-direction: row;
-  gap: 1vw;
-}
-
-.sub-image {
-  border: 1px solid #afafaf;
-  border-radius: 12px;
-  overflow: hidden;
-  height: 10vh;
-  width: 5vw;
-}
-
-.image {
-  width: 100%;
-  object-fit: cover;
-}
-
-.info-container {
-  display: flex;
-  flex-direction: column;
-} */
-
 @font-face {
   font-family: "nazanin";
   src: url(./B-NAZANIN.TTF);
@@ -130,6 +84,7 @@ select {
 }
 /* --- رنگ‌ها --- */
 
+/* رنگ‌ها */
 .colors {
   display: flex;
   gap: 10px;
@@ -137,28 +92,32 @@ select {
 }
 
 .color-btn {
-  width: 22px;
-  height: 22px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 2px solid #ccc;
   cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
-.color-btn:nth-child(1) {
-  background-color: #6b705c;
-} /* زیتونی */
-.color-btn:nth-child(2) {
-  background-color: black;
-}
-.color-btn:nth-child(3) {
-  background-color: navy;
-}
-.color-btn:nth-child(4) {
-  background-color: purple;
+/* حالت hover */
+.color-btn:hover {
+  transform: scale(1.1);
+  border-color: #888;
 }
 
+/* حالت فعال */
 .color-btn.active {
-  border: 3px solid #444;
+  border: 3px solid #222;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+}
+
+/* وقتی موجودی صفره */
+.color-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: #bbb;
 }
 
 /* قیمت */
@@ -305,22 +264,22 @@ select {
 }
 
 .product-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-top: 16px;
 }
 
-.product-gallery img {
-  width: 100%;
-  height: 140px;
+.main-image {
+  width: 38rem;
+  height: 40rem;
   object-fit: cover;
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 
-.product-gallery img:hover {
+.thumbs > img:hover {
   transform: scale(1.05);
 }
 

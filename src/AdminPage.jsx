@@ -37,6 +37,7 @@ function ProductStep({ product, setProduct, setVariants, setEditingId, next }) {
       p.variants.map((v) => ({
         size: v.size,
         color: v.color,
+        color_hex: v.color_hex || "#000000", // ← این خط اضافه شد
         price: Number(v.price),
         stock: v.stock,
       }))
@@ -131,11 +132,21 @@ function VariantRow({ variant, index, update, remove }) {
         onChange={(e) => update(index, "size", e.target.value)}
       />
 
+      {/* نام رنگ */}
       <input
         className="variant-input"
-        placeholder="رنگ"
+        placeholder="نام رنگ (مثلاً زیتونی)"
         value={variant.color}
         onChange={(e) => update(index, "color", e.target.value)}
+      />
+
+      {/* انتخاب رنگ */}
+      <input
+        type="color"
+        className="variant-color-picker"
+        value={variant.color_hex}
+        onChange={(e) => update(index, "color_hex", e.target.value)}
+        title="انتخاب رنگ"
       />
 
       <input
@@ -216,6 +227,7 @@ function VariantStep({
       {
         size: "فری سایز",
         color: "",
+        color_hex: "#000000",
         price: product.base_price,
         stock: "",
       },
@@ -271,6 +283,7 @@ export default function AdminPage() {
     {
       size: "فری سایز",
       color: "",
+      color_hex: "#000000",
       price: "",
       stock: "",
     },
@@ -319,7 +332,16 @@ export default function AdminPage() {
         base_price: "",
       });
 
-      setVariants([{ size: "فری سایز", color: "", price: "", stock: "" }]);
+      setVariants([
+        {
+          size: "فری سایز",
+          color: "",
+          color_hex: "#000000",
+          price: "",
+          stock: "",
+        },
+      ]);
+
       setImages([]);
 
       setEditingId(null);

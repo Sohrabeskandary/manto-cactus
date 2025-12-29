@@ -1,75 +1,90 @@
-import { useState, useEffect } from "react";
-import "./ProductPage.css";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-const similarProducts = [
-  {
-    id: 1,
-    name: "مانتو مدل هیوا",
-    price: "1,949,000 تومان",
-    image: "/new1.jpg",
-    link: "/",
-  },
-  {
-    id: 2,
-    name: "مانتو مدل هیوا",
-    price: "1,949,000 تومان",
-    image: "/new2.jpg",
-    link: "/",
-  },
-  {
-    id: 3,
-    name: "مانتو مدل هیوا",
-    price: "1,949,000 تومان",
-    image: "/new3.jpeg",
-    link: "/",
-  },
-  {
-    id: 4,
-    name: "مانتو مدل هیوا",
-    price: "1,949,000 تومان",
-    image: "/new4.jpg",
-    link: "/",
-  },
-  {
-    id: 5,
-    name: "مانتو مدل هیوا",
-    price: "1,949,000 تومان",
-    image: "/new5.jpg",
-    link: "/",
-  },
-];
+import "./ProductPage.css";
 
 export default function ProductPage() {
-  const [size, setSize] = useState("1");
-  const [color, setColor] = useState("olive");
-  const [qty, setQty] = useState(1);
-  const [images, setImages] = useState([]);
   const { id } = useParams();
+
+  const [product, setProduct] = useState(null);
+  const [variants, setVariants] = useState([]);
+  const [images, setImages] = useState([]);
+  const [activeImage, setActiveImage] = useState("");
+
+  const [size, setSize] = useState("");
+  const [selectedColors, setSelectedColors] = useState({}); // نگه داشتن رنگ انتخابی برای هر سایز
+  const [qty, setQty] = useState(1);
+
+  /* product */
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/products/${id}`)
+      .then((res) => res.json())
+      .then(setProduct)
+      .catch(console.error);
+  }, [id]);
+
+  /* variants */
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/products/${id}/variants`)
+      .then((res) => res.json())
+      .then((data) => {
+        setVariants(data);
+        if (data.length) setSize(data[0].size);
+      })
+      .catch(console.error);
+  }, [id]);
+
+  /* images */
   useEffect(() => {
     fetch(`http://localhost:5000/api/products/${id}/images`)
       .then((res) => res.json())
-      .then((data) => setImages(data))
-      .catch((err) => console.error(err));
+      .then((data) => {
+        setImages(data);
+        if (data.length) {
+          setActiveImage(`http://localhost:5000/uploads/${data[0].filename}`);
+        }
+      })
+      .catch(console.error);
   }, [id]);
+
+  if (!product) return <p>در حال بارگذاری...</p>;
+
+  const sizes = [...new Set(variants.map((v) => v.size))];
+
+  const availableColors = variants.filter((v) => v.size === size);
+
+  const selectedVariant = variants.find(
+    (v) => v.size === size && v.color_hex === selectedColors[size]
+  );
+
+  const handleColorClick = (colorHex) => {
+    setSelectedColors({ ...selectedColors, [size]: colorHex });
+  };
+
   return (
     <div className="big-container">
       <div className="product-page">
-        {/* ---- تصاویر ---- */}
+        {/* گالری */}
         <div className="product-gallery">
-          <img src="/best5.jpeg" className="main-image" alt="main" />
-
+          <img src={activeImage} className="main-image" alt="" />
           <div className="thumbs">
-            <img src="/best2.jpg" alt="" />
-            <img src="/best3.jpg" alt="" />
-            <img src="/best3.jpg" alt="" />
-            <img src="/best3.jpg" alt="" />
+            {images.map((img) => (
+              <img
+                key={img.id}
+                src={`http://localhost:5000/uploads/${img.filename}`}
+                onClick={() =>
+                  setActiveImage(
+                    `http://localhost:5000/uploads/${img.filename}`
+                  )
+                }
+                alt=""
+              />
+            ))}
           </div>
         </div>
 
-        {/* ---- جزئیات محصول ---- */}
+        {/* اطلاعات */}
         <div className="product-info">
-          <h1 className="title">کت و شلوار مدل سونار کد 1892</h1>
+          <h1 className="title">{product.title}</h1>
 
           {/* سایز */}
           <div className="block">
@@ -77,97 +92,84 @@ export default function ProductPage() {
             <select
               className="size-option"
               value={size}
-              onChange={(e) => setSize(e.target.value)}
+              onChange={(e) => {
+                setSize(e.target.value);
+                // هنگام تغییر سایز، رنگ انتخابی فعلی را reset نکن
+                if (!selectedColors[e.target.value]) {
+                  setSelectedColors({
+                    ...selectedColors,
+                    [e.target.value]: "",
+                  });
+                }
+              }}
             >
-              <option className="size-option" value="1">
-                سایز 1
-              </option>
-              <option className="size-option" value="2">
-                سایز 2
-              </option>
-              <option className="size-option" value="3">
-                سایز 3
-              </option>
+              {sizes.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* رنگ‌ها */}
+          {/* رنگ */}
           <div className="block">
-            <h3>رنگ‌های موجود در این سایز:</h3>
+            <h3>رنگ‌های موجود:</h3>
             <div className="colors">
-              <button
-                className={color === "olive" ? "color-btn active" : "color-btn"}
-                onClick={() => setColor("olive")}
-              />
-              <button
-                className={color === "black" ? "color-btn active" : "color-btn"}
-                onClick={() => setColor("black")}
-              />
-              <button
-                className={color === "navy" ? "color-btn active" : "color-btn"}
-                onClick={() => setColor("navy")}
-              />
-              <button
-                className={
-                  color === "purple" ? "color-btn active" : "color-btn"
-                }
-                onClick={() => setColor("purple")}
-              />
+              {availableColors.map((v) => (
+                <button
+                  key={v.id}
+                  className={
+                    selectedColors[size] === v.color_hex
+                      ? "color-btn active"
+                      : "color-btn"
+                  }
+                  style={{ backgroundColor: v.color_hex }}
+                  onClick={() => handleColorClick(v.color_hex)}
+                  title={v.color}
+                  disabled={v.stock === 0}
+                />
+              ))}
             </div>
+            {selectedVariant && (
+              <p className="selected-color">
+                رنگ انتخاب‌شده: {selectedVariant.color}
+              </p>
+            )}
           </div>
 
           {/* قیمت */}
-          <p className="price">۳,۱۱۸,۰۰۰ تومان</p>
+          <p className="price">
+            {(selectedVariant?.price || product.base_price).toLocaleString()}{" "}
+            تومان
+          </p>
+
+          {/* موجودی */}
+          {selectedVariant && (
+            <p className="stock">موجودی: {selectedVariant.stock}</p>
+          )}
 
           {/* تعداد */}
           <div className="qty-box">
-            <span className="qty-label">تعداد:</span>
             <button onClick={() => setQty(qty > 1 ? qty - 1 : 1)}>-</button>
-            <span className="qty-num">{qty}</span>
-            <button onClick={() => setQty(qty + 1)}>+</button>
+            <span>{qty}</span>
+            <button
+              onClick={() =>
+                selectedVariant &&
+                qty < selectedVariant.stock &&
+                setQty(qty + 1)
+              }
+            >
+              +
+            </button>
           </div>
 
-          {/* دکمه خرید */}
-          <button className="add-to-cart">افزودن به سبد خرید</button>
-
-          {/* ویژگی‌ها */}
-          <div className="features">
-            <div>نحوه بسته شدن: دکمه</div>
-            <div>قد: بالای زانو</div>
-            <div>جنس: نخ پنبه</div>
-            <div>تنخور: آزاد</div>
-            <div>مدل یقه: انگلیسی</div>
-          </div>
-        </div>
-        {/* محصولات مشابه */}
-      </div>
-      <div className="product-gallery">
-        {images.map((img) => (
-          <img
-            key={img.id}
-            src={`http://localhost:5000/uploads/${img.filename}`}
-            alt="product"
-          />
-        ))}
-      </div>
-
-      <div className="new-products-section">
-        <h2 className="section-title">محصولات مشابه:</h2>
-        <div className="product-list">
-          {similarProducts.map((product) => (
-            <a href={product.link} key={product.id} className="product-card">
-              <img src={product.image} alt={product.name} />
-              <div className="product-info">
-                <p className="product-name">{product.name}</p>
-                <p className="product-price">{product.price}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-        <div className="see-all">
-          <a href="/products" className="see-all-btn">
-            مشاهده همه
-          </a>
+          {/* افزودن به سبد */}
+          <button
+            className="add-to-cart"
+            disabled={!selectedVariant || selectedVariant.stock === 0}
+          >
+            افزودن به سبد خرید
+          </button>
         </div>
       </div>
     </div>
