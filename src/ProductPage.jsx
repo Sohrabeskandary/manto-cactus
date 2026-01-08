@@ -124,8 +124,7 @@ export default function ProductPage() {
             </div>
             {selectedVariant && (
               <p className="selected-color">
-                رنگ انتخاب‌شده: {selectedVariant.color},{" "}
-                {selectedVariant.color_hex}
+                رنگ انتخاب‌شده: {selectedVariant.color}
               </p>
             )}
           </div>
