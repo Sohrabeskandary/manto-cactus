@@ -37,14 +37,14 @@ function ProductStep({ product, setProduct, setVariants, setEditingId, next }) {
       p.variants.map((v) => ({
         size: v.size,
         color: v.color,
-        color_hex: v.color_hex || "#000000", // ← این خط اضافه شد
+        color_hex: v.color_hex || "#000000",
         price: Number(v.price),
         stock: v.stock,
       }))
     );
 
     setEditingId(p.id);
-    next(); // برو مرحله واریانت
+    next();
   };
 
   const handleDelete = async (id) => {
@@ -132,7 +132,6 @@ function VariantRow({ variant, index, update, remove }) {
         onChange={(e) => update(index, "size", e.target.value)}
       />
 
-      {/* نام رنگ */}
       <input
         className="variant-input"
         placeholder="نام رنگ (مثلاً زیتونی)"
@@ -140,7 +139,6 @@ function VariantRow({ variant, index, update, remove }) {
         onChange={(e) => update(index, "color", e.target.value)}
       />
 
-      {/* انتخاب رنگ */}
       <input
         type="color"
         className="variant-color-picker"
@@ -312,7 +310,7 @@ export default function AdminPage() {
     try {
       const res = await fetch(url, {
         method,
-        body: formData, // ❗ no headers
+        body: formData,
       });
 
       const data = await res.json();
@@ -324,7 +322,6 @@ export default function AdminPage() {
 
       alert(editingId ? "محصول ویرایش شد ✅" : "محصول ثبت شد ✅");
 
-      // reset
       setProduct({
         title: "",
         description: "",

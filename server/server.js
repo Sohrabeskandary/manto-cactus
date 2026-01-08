@@ -154,7 +154,8 @@ app.get("/api/products/:id/variants", async (req, res) => {
         id,
         size,
         color,
-        stock
+        stock,
+        color_hex
       FROM variants
       WHERE product_id = $1
       ORDER BY size

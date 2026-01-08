@@ -92,6 +92,7 @@ select {
 }
 
 .color-btn {
+  background-color: transparent;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -115,6 +116,7 @@ select {
 
 /* وقتی موجودی صفره */
 .color-btn:disabled {
+  background-color: inherit !important;
   opacity: 0.4;
   cursor: not-allowed;
   border-color: #bbb;
