@@ -35,7 +35,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ storage });
 
 app.use("/uploads", express.static("uploads"));
 
@@ -111,11 +111,22 @@ app.get("/api/products", async (req, res) => {
     const variantsResult = await pool.query("SELECT * FROM variants");
     const imagesResult = await pool.query("SELECT * FROM product_images");
 
-    const products = productsResult.rows.map((product) => ({
-      ...product,
-      variants: variantsResult.rows.filter((v) => v.product_id === product.id),
-      images: imagesResult.rows.filter((img) => img.product_id === product.id),
-    }));
+    const products = productsResult.rows.map((product) => {
+      const productVariants = variantsResult.rows.filter(
+        (v) => v.product_id === product.id
+      );
+
+      const productImages = imagesResult.rows
+        .filter((img) => img.product_id === product.id)
+        .sort((a, b) => a.id - b.id);
+
+      return {
+        ...product,
+        variants: productVariants,
+        images: productImages,
+        coverImage: productImages.length ? productImages[0].filename : null,
+      };
+    });
 
     res.json(products);
   } catch (err) {

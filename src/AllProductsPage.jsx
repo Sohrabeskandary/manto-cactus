@@ -3,51 +3,16 @@ import "./AllProductsPage.css";
 import "./NewProducts.css";
 
 export default function AllProductsPage() {
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "مانتو مدل هیوا",
-      price: "1,949,000 تومان",
-      image: "/best1.jpeg",
-      link: "/1",
-    },
-    {
-      id: 2,
-      name: "مانتو مدل هیوا",
-      price: "1,949,000 تومان",
-      image: "/best2.jpg",
-      link: "/",
-    },
-    {
-      id: 3,
-      name: "مانتو مدل هیوا",
-      price: "1,949,000 تومان",
-      image: "/best3.jpg",
-      link: "/",
-    },
-    {
-      id: 4,
-      name: "مانتو مدل هیوا",
-      price: "1,949,000 تومان",
-      image: "/best4.jpeg",
-      link: "/",
-    },
-    {
-      id: 5,
-      name: "مانتو مدل هیوا",
-      price: "1,949,000 تومان",
-      image: "/best5.jpeg",
-      link: "/",
-    },
-  ]);
+  const [products, setProducts] = useState([]);
   const [showAvailable, setShowAvailable] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5173/api/products")
+    fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.error(err));
+      .then(setProducts)
+      .catch(console.error);
   }, []);
+  console.log(products);
 
   return (
     <div>
@@ -116,14 +81,24 @@ export default function AllProductsPage() {
           <div className="product-list-full-page">
             {products.map((product) => (
               <a
-                href={`/products/${product.id}`}
                 key={product.id}
+                href={`/products/${product.id}`}
                 className="product-card"
               >
-                <img src={product.image} alt={product.name} />
+                <img
+                  src={
+                    product.coverImage
+                      ? `http://localhost:5000/uploads/${product.coverImage}`
+                      : "/no-image.jpg"
+                  }
+                  alt={product.title}
+                />
+
                 <div className="product-info">
-                  <p className="product-name">{product.name}</p>
-                  <p className="product-price">{product.price}</p>
+                  <p className="product-name">{product.title}</p>
+                  <p className="product-price">
+                    {product.base_price.toLocaleString()} تومان
+                  </p>
                 </div>
               </a>
             ))}
